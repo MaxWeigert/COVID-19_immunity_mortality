@@ -22,8 +22,22 @@ source("Functions.R")
 
 ################################################################################
 
+# Reading of the data:
+Sys.setlocale("LC_ALL", "English")
+user <- "max"
+if (user == "max") {
+  load("Y:/03_Forschung/01_Projekte/10_Corona/01_Analysen/Impfungen/Daten_Impfen_2022_09_07_update.RData")
+}
+if (user == "rickmer") {
+  load("/Volumes/stablab/03_Forschung/01_Projekte/10_Corona/01_Analysen/Impfungen/Daten_Impfen_2022_09_07_update.RData")
+}
+
 # Data preparation:
 data <- prepare_data(data_output)
+
+################################################################################
+
+## Descriptive analysis:
 
 # Summary statistics:
 data$Alter2 <- if_else(data$AlterKat %in% c("60-64", "65-69", "70-74", "75-79"),
@@ -55,6 +69,11 @@ plot_km <- km_plot(data)
 ggsave(plot = plot_km, filename = "Graphics/Figure2.png", width = 11,
        height = 5)
 
+
+################################################################################
+
+## Model-based analysis:
+
 # Fitting of the cox model:
 data_model <- data %>% filter(Geschlecht != "divers") %>% droplevels()
 model <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
@@ -64,11 +83,6 @@ model <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                x = TRUE, data = data_model)
 summary(model)
 
-# Computation of risk reduction metrics:
-system.time(rr <- compute_rr_metrics(data = data_model, model = model,
-                                     confint = TRUE, samples = 1000))
-saveRDS(rr, file = "rr.rds")
-
 # Visualization of results:
 plot_spline <- spline_plot(model)
 ggsave(plot = plot_spline, filename = "Graphics/Figure3.png", width = 10,
@@ -77,10 +91,11 @@ plot_coef <- coef_plot(model)
 ggsave(plot = plot_coef, filename = "Graphics/Figure4.png", width = 10,
        height = 5)
 
+# Computation of risk reduction metrics:
+system.time(rr <- compute_rr_metrics(data = data_model, model = model,
+                                     confint = TRUE, samples = 1000))
+saveRDS(rr, file = "rr.rds")
 
-# Computation of absolute risk reduction and number needed to treat (with
-# confidence intervals):
-compute_arr_statistics(model = model, data = data_model, confint = FALSE)
 
 
 

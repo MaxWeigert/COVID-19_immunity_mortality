@@ -6,18 +6,48 @@
 # Function to prepare data for further analyses:
 prepare_data <- function(data, type = "main") {
   
-  # Create date of disease recording:
-  data <- data %>%
-    mutate(Erkrankungsdatum_surv = pmin(Erkrankungsbeginn, Meldedatum, na.rm = TRUE))
-  
-  # Correct time interval:
-  data <- data %>% filter(between(Erkrankungsdatum_surv, as.Date("2022-01-01"),
-                                  as.Date("2022-06-30")))
-  
   # Labels without umlaut:
   levels(data$Geschlecht)[5] <- "maennlich"
   
-  # Patients are filtered out if they are either: 1) younger than 60, 2) not "männlich" or "weiblich" 3) VerstorbenStatus is "nicht erhoben" or "nicht ermittelbar"
+  # Create earliest date of documented infection:
+  data <- data %>%
+    mutate(Erkrankungsdatum_surv = pmin(Erkrankungsbeginn, Meldedatum,
+                                        na.rm = TRUE))
+  
+  # Adjustment of death date and disease recording:
+  data <- data %>%
+    mutate(Datum_diff = as.numeric(VerstorbenDatum) -
+             as.numeric(Erkrankungsdatum_surv))
+  med <- median(data$Datum_diff[data$AlterKat %in% c("60-64", "65-69", "70-74",
+                                                     "75-79","80-84", "85-89",
+                                                     "90+") &
+                           data$Geschlecht %in% c("maennlich", "weiblich",
+                                                  "divers")],
+                na.rm = TRUE)
+  # 8 days
+  
+  # Death date earlier than earliest date of documented infection:
+  data <- data %>%
+    mutate(Erkrankungsdatum_surv = as.Date(if_else(!is.na(VerstorbenDatum) & 
+                                                     (as.numeric(Erkrankungsdatum_surv) > as.numeric(VerstorbenDatum)) &
+                                                     VerstorbenStatus == "Ja",
+                                                   VerstorbenDatum - med, Erkrankungsdatum_surv)))
+  
+  # Missing death date:
+  data <- data %>%
+    mutate(VerstorbenDatum = as.Date(if_else(is.na(VerstorbenDatum) &
+                                               VerstorbenStatus == "Ja",
+                                             Erkrankungsdatum_surv + med,
+                                             VerstorbenDatum)))
+  
+  # Correct time interval:
+  data <- data %>%
+    filter(between(Erkrankungsdatum_surv, as.Date("2022-01-01"),
+                   as.Date("2022-06-30")))
+  
+  # Patients are filtered out if they are either: 1) younger than 60,
+  # 2) not "männlich", "weiblich" or "divers" or 3) VerstorbenStatus is
+  # "nicht erhoben" or "nicht ermittelbar"
   data <- data %>%
     filter(AlterKat %in% c("60-64", "65-69", "70-74", "75-79","80-84", "85-89", "90+")) %>%
     filter(Geschlecht %in% c("maennlich", "weiblich", "divers"))
@@ -27,6 +57,7 @@ prepare_data <- function(data, type = "main") {
     return(data)
   }
   
+  # Adjustment of level of immunity:
   data <- data %>%
     filter(VerstorbenStatus %in% c("Ja", "Nein")) %>%
     droplevels() %>% 
@@ -34,10 +65,6 @@ prepare_data <- function(data, type = "main") {
                                                          "unplausible oder unzureichende Angaben") |
                                          is.na(impfstatus) ~ "keine Angabe",
                                        TRUE ~ impfstatus))
-  
-  # Exclude cases with implausible death date:
-  data <- data %>%
-    filter(is.na(VerstorbenDatum) | VerstorbenDatum >= as.Date("2022-01-01"))
   
   # Patients with age 80 or older:
   if (type == "80+") {
@@ -52,30 +79,17 @@ prepare_data <- function(data, type = "main") {
                                              0, VerstorbenStatus_surv))
   }
   
-  # New and creates a problem
-  # If Erkrankungsdatum_surv is after VerstorbenDatum then compute it from VerstorbenDatum (- 8 days)
-  data <- data %>%
-    mutate(Erkrankungsdatum_surv = as.Date(if_else(!is.na(VerstorbenDatum) & 
-                                                     (as.numeric(Erkrankungsdatum_surv) > as.numeric(VerstorbenDatum)) &
-                                                     VerstorbenStatus == "Ja",
-                                                   VerstorbenDatum - 8, Erkrankungsdatum_surv)))
-  
-  # If VerstorbenDatum does not exist then compute it from Erkrankungsdatum_surv (+ 8 days)
-  data <- data %>%
-    mutate(VerstorbenDatum = as.Date(if_else(is.na(VerstorbenDatum) &
-                                               VerstorbenStatus == "Ja",
-                                             Erkrankungsdatum_surv + 8,
-                                             VerstorbenDatum)))
-  
   # Exclusion of implausible observations:
   data <- data %>% filter(between(Erkrankungsdatum_surv, as.Date("2022-01-01"),
                                   as.Date("2022-06-30")))
   
   # Adjust Impfstatus according to time between Erkrankungsdatum and Impfdatum
   data <- data %>%
-    mutate(Impfstatus_surv = case_when(Impfstatus_surv == "geboostert" & (as.numeric(Erkrankungsdatum_surv) - as.numeric(impfung_datum)) < 7 ~
+    mutate(Impfstatus_surv = case_when(Impfstatus_surv == "geboostert" &
+                                         (as.numeric(Erkrankungsdatum_surv) - as.numeric(impfung_datum)) < 7 ~
                                          "grundimmunisiert",
-                                       Impfstatus_surv == "grundimmunisiert" & (as.numeric(Erkrankungsdatum_surv) - as.numeric(impfung_datum)) < 14 ~
+                                       Impfstatus_surv == "grundimmunisiert" &
+                                         (as.numeric(Erkrankungsdatum_surv) - as.numeric(impfung_datum)) < 14 ~
                                          "unvollstaendig grundimmunisiert",
                                        TRUE ~ Impfstatus_surv))
   
@@ -238,7 +252,7 @@ estimate_rr_category <- function(data, model, category) {
 ################################################################################
 
 ## ggplot theme:
-theme <- theme_minimal() +
+theme <- theme_bw() +
   theme(text = element_text(size = 16), axis.title = element_text(size = 18),
         axis.text = element_text(size = 14),
         legend.text = element_text(size = 16),
@@ -258,14 +272,14 @@ km_plot <- function(data) {
                       Impfstatus_surv, type = "kaplan-meier",
                     data = data)
   gg_km <- ggsurvplot(fit = km_fit, data = data, conf.int = FALSE,
-                        xlab = "Days after date of symptom onset",
+                        xlab = "Days after earliest date of documented infection",
                       ylab = "Survival probability S(t)", title = "",
                         ylim = c(0.97, 1), ggtheme = theme)
   gg_km <- gg_km$plot +
     scale_color_viridis(discrete = TRUE, name = "",
-                        labels = c("unvaccinated", "incomplete primary", "primary (> 6 months)", 
-                                   "primary (\u2264 6 months)", "booster (> 3 months)", 
-                                   "booster (\u2264 3 months)", "unknown")) +
+                        labels = c("unvaccinated", "incomplete primary", "full primary (> 6 months)", 
+                                   "full primary (\u2264 6 months)", "boosted (> 3 months)", 
+                                   "boosted (\u2264 3 months)", "unknown")) +
     theme + theme(legend.position = "bottom")
   
   return(gg_km)
@@ -283,25 +297,23 @@ coef_plot <- function(model, type = "main") {
   plot_dat <- plot_dat %>%
     dplyr::rename(coef = exp.coef., CI_lower = lower..95, CI_upper = upper..95)
 
-  sep_labels <- c("unvaccinated", "incomplete\n primary", "primary\n (> 6 months)", 
-                  "primary\n (\u2264 6 months)", "booster\n (> 3 months)", 
-                  "booster\n (\u2264 3 months)", "unknown")
+  sep_labels <- c("unvaccinated", "incomplete\n primary", "full primary\n (> 6 months)", 
+                  "full primary\n (\u2264 6 months)", "boosted\n (> 3 months)", 
+                  "boosted\n (\u2264 3 months)", "unknown")
   if (type == "known_vaccinations") {
     sep_labels[-length(sep_labels)]
   }
 
   gg_coef <- ggplot(plot_dat, mapping = aes(x = param, y = coef)) +
     geom_hline(yintercept = 1, col = gray(0.3), lty = 2) +
-    geom_pointrange(mapping = aes(ymin = CI_lower, ymax = CI_upper), size = 0.75) +
+    geom_pointrange(mapping = aes(ymin = CI_lower, ymax = CI_upper),
+                    size = 1, fatten = 3) +
     geom_point() + theme +
     scale_x_discrete(limits=plot_dat$param, labels= sep_labels) +
     scale_y_continuous(trans = log_trans(), limits = c(0.05, 30),
                        breaks = c(0, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16),
                        labels = c(0, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16)) +
-    labs(x="Vaccination status", y="Hazard Ratio")#+
-    #theme(axis.text=element_text(size=12),
-    #axis.title=element_text(size=16))
-  
+    labs(x="Level of immunity", y="Hazard ratio")
   gg_coef
 }
 
@@ -310,8 +322,7 @@ line_plot <- function(data, type) {
   
   # Compute infection detection date by week:
   data_by_week <- data %>% 
-    mutate(week = cut.Date(Erkrankungsdatum_surv, breaks = "1 week",
-                           labels = FALSE))%>% 
+    mutate(week = week(Erkrankungsdatum_surv))%>% 
     arrange(Erkrankungsdatum_surv)
   
   # Cases with unknown vaccination status:
@@ -319,13 +330,17 @@ line_plot <- function(data, type) {
     na_count_by_week <- data_by_week %>%
       dplyr::count(week, "NA_Impfstatus" = Impfstatus_surv %in% c("keine Angabe")) 
     na_count_by_week <- group_by(na_count_by_week, week) %>%
-      mutate(percent = n/sum(n))
+      mutate(percent = n/sum(n),
+             date = as.Date((week - 1) * 7 + 3,
+                            origin = as.Date("2022-01-01")))
     na_count_by_week <- na_count_by_week %>% filter(NA_Impfstatus == "TRUE")
     
-    plot <- ggplot(na_count_by_week, aes(x=week, percent)) +
+    plot <- ggplot(na_count_by_week, aes(x=date, percent)) +
       geom_line() + theme +
-      scale_y_continuous(limits = c(0, 1), labels = scales::percent) + 
-      labs(x = "Calendar week", y = "Percentage")
+      scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+      scale_x_date(date_breaks = "1 month", date_labels =  "%b") +
+      labs(x = "Earliest date of documented infection",
+           y = "Relative frequency")
   }
   
   # Cases with unknown  outcome:
@@ -334,13 +349,17 @@ line_plot <- function(data, type) {
       dplyr::count(week, "NA_Verstorbenstatus" = VerstorbenStatus %in%
                      c("nicht erhoben", "nicht ermittelbar")) 
     outcome_na_count_by_week <- group_by(outcome_na_count_by_week, week) %>%
-      mutate(percent = n/sum(n))
+      mutate(percent = n/sum(n),
+             date = as.Date((week - 1) * 7 + 3,
+                            origin = as.Date("2022-01-01")))
     outcome_na_count_by_week <- outcome_na_count_by_week%>%
       filter(NA_Verstorbenstatus == "TRUE")
-    plot <- ggplot(outcome_na_count_by_week, aes(x=week, percent)) +
+    plot <- ggplot(outcome_na_count_by_week, aes(x=date, percent)) +
       geom_line() + theme +
       scale_y_continuous(limits = c(0, 0.1), labels = scales::percent) + 
-      labs(x = "Calendar week", y = "Percentage")
+      scale_x_date(date_breaks = "1 month", date_labels =  "%b") +
+      labs(x = "Earliest date of documented infection",
+           y = "Relative frequency")
   }
   return(plot)
 }
@@ -365,10 +384,12 @@ cause_plot <- function(data) {
   gg_bar <- ggplot(data, mapping = aes(x = month, fill = VerstorbenGrund)) +
     geom_bar(position = position_fill(reverse = TRUE)) + 
     scale_fill_grey(start = 0.2, end = 0.8,
-                      name = "",
-                        labels = c("Death from COVID-19", "Death from diseases other than COVID-19", "Cause of death unknown or undetermined")) +
+                    name = "Cause of COVID-19-related death",
+                    labels = c("direct", "indirect", "unknown")) +
+    
     scale_y_continuous(labels = scales::percent) +
-    ylab("Percentage") + xlab("") + theme + theme(legend.position = "bottom") + theme(legend.text = element_text(size=10))
+    ylab("Relative frequency") + xlab("") + theme + theme(legend.position = "bottom") +
+    theme(legend.text = element_text(size=10))
   return(gg_bar)
 }
 
@@ -393,7 +414,7 @@ spline_plot <- function(model, terms = c(4,3), type = "main") {
                        labels = c(0, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16),
                        position = "right") +
     labs(y="", 
-         x="Date of infection detection")
+         x="Earliest date of documented infection")
   plt_1 <- plt_1 + geom_ribbon(aes(ymin=lower_exp, ymax=upper_exp), linetype=2, alpha=0.1)
   sp_gg <- plt_1
   
@@ -421,7 +442,7 @@ spline_plot <- function(model, terms = c(4,3), type = "main") {
       scale_y_continuous(trans = log_trans(), limits = c(0.05, 30),
                          breaks = c(0, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16),
                          labels = c(0, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16)) +
-      labs(y="Hazard Ratio", x = "Age (in years)")
+      labs(y="Hazard ratio", x = "Age [in years]")
     plt_2 <- plt_2 + geom_ribbon(aes(ymin=lower_exp, ymax=upper_exp), linetype=2, alpha=0.1)
     
     sp_gg <- grid.arrange(plt_2, plt_1, ncol=2)
