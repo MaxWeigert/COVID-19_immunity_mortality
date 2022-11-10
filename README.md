@@ -8,5 +8,5 @@ The code contains the R code for all relevant analyses in the paper, including t
 Folder structure:
 
 - Code: Code for the main analyses and the sensitivity analyses, both building on functions in `Functions.R`
-- Graphics: Figures contained in the manuscript and the supplementary material. The code for Figures 1 and 2 is not part of this repository.
+- Graphics: Figures contained in the manuscript and the supplementary material. The code for Figure 1 is not part of this repository.
 - Models: Estimated model objects
