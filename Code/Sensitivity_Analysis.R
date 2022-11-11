@@ -16,13 +16,8 @@ library(lubridate)
 source("Functions.R")
 
 # Reading of the data:
-user <- "max"
-if (user == "max") {
-  load("Y:/03_Forschung/01_Projekte/10_Corona/01_Analysen/Impfungen/Daten_Impfen_2022_09_07_finalfinal.RData")
-}
-if (user == "rickmer") {
-  load("/Volumes/stablab/03_Forschung/01_Projekte/10_Corona/01_Analysen/Impfungen/Daten_Impfen_2022_09_07_finalfinal.RData")
-}
+Sys.setlocale("LC_ALL", "English")
+load("Daten_Impfen_2022_09_07.RData")
 
 # Data preparation:
 data <- prepare_data(data_output)
@@ -35,12 +30,13 @@ model1 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                  pspline(Alter_surv_num, df = 4) +
                  pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data1_model)
+# saveRDS(model1, file = "Models/Sensitivity_model1.rds")
 plot_spline <- spline_plot(model1)
-ggsave(plot = plot_spline, filename = "Graphics/FigureS4.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS4.png", width = 10,
+#       height = 5)
 plot_coef <- coef_plot(model1)
-ggsave(plot = plot_coef, filename = "Graphics/FigureS5.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS5.png", width = 10,
+#       height = 5)
 
 
 # 2. Using a modified definition of the dependent variable only considering cases for whom physicians had certified COVID-19 as direct cause of death. 
@@ -52,12 +48,13 @@ model2 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   pspline(Alter_surv_num, df = 4) +
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data2_model)
+# saveRDS(model2, file = "Models/Sensitivity_model2.rds")
 plot_spline <- spline_plot(model2)
-ggsave(plot = plot_spline, filename = "Graphics/FigureS6.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS6.png", width = 10,
+#        height = 5)
 plot_coef <- coef_plot(model2)
-ggsave(plot = plot_coef, filename = "Graphics/FigureS7.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS7.png", width = 10,
+#       height = 5)
 
 # 3. Restricting our analysis to subjects older than 79 years
 data3 <- prepare_data(data, type = "80+")
@@ -66,12 +63,13 @@ model3 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   Geschlecht + Impfstatus_surv + Alter_surv_num +
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data3_model)
+# saveRDS(model3, file = "Models/Sensitivity_model3.rds")
 plot_spline <- spline_plot(model3)
 ggsave(plot = plot_spline, filename = "Graphics/FigureS10.png", width = 10,
        height = 5)
 plot_coef <- coef_plot(model3)
-ggsave(plot = plot_coef, filename = "Graphics/FigureS11.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS11.png", width = 10,
+#       height = 5)
 
 # 4. Restricting our analysis to subjects whose vaccination status had been known
 data4 <- prepare_data(data, type = "known_vaccination")
@@ -81,12 +79,13 @@ model4 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   pspline(Alter_surv_num, df = 4) +
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data4_model)
+# saveRDS(model4, file = "Models/Sensitivity_model4.rds")
 plot_spline <- spline_plot(model4)
-ggsave(plot = plot_spline, filename = "Graphics/FigureS8.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS8.png", width = 10,
+#       height = 5)
 plot_coef <- coef_plot(model4, type = "known_vaccinations")
-ggsave(plot = plot_coef, filename = "Graphics/FigureS9.png", width = 10,
-       height = 5)
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS9.png", width = 10,
+#       height = 5)
 
 
 

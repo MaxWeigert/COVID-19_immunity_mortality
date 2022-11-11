@@ -22,7 +22,8 @@ prepare_data <- function(data, type = "main") {
                                                      "75-79","80-84", "85-89",
                                                      "90+") &
                            data$Geschlecht %in% c("maennlich", "weiblich",
-                                                  "divers")],
+                                                  "divers") &
+                             data$Datum_diff >= 0],
                 na.rm = TRUE)
   # 8 days
   
@@ -273,14 +274,16 @@ km_plot <- function(data) {
                     data = data)
   gg_km <- ggsurvplot(fit = km_fit, data = data, conf.int = FALSE,
                         xlab = "Days after earliest date of documented infection",
-                      ylab = "Survival probability S(t)", title = "",
+                      ylab = "Survival under COVID-19 infection", title = "",
                         ylim = c(0.97, 1), ggtheme = theme)
   gg_km <- gg_km$plot +
+    scale_y_continuous(labels = scales::percent, limits = c(0.97, 1)) +
     scale_color_viridis(discrete = TRUE, name = "",
                         labels = c("unvaccinated", "incomplete primary", "full primary (> 6 months)", 
                                    "full primary (\u2264 6 months)", "boosted (> 3 months)", 
                                    "boosted (\u2264 3 months)", "unknown")) +
-    theme + theme(legend.position = "bottom")
+    theme + theme(legend.position = "bottom",
+                  legend.text = element_text(size = 14), strip.text.y = element_text(size = 14))
   
   return(gg_km)
 }
@@ -338,7 +341,10 @@ line_plot <- function(data, type) {
     plot <- ggplot(na_count_by_week, aes(x=date, percent)) +
       geom_line() + theme +
       scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-      scale_x_date(date_breaks = "1 month", date_labels =  "%b") +
+      scale_x_date(breaks = seq(from = as.Date("2022-01-01"),
+                                to = as.Date("2022-06-30"), by = "1 month"),
+                   date_labels =  "%b",
+                   limits = c(as.Date("2022-01-01"), as.Date("2022-06-30"))) +
       labs(x = "Earliest date of documented infection",
            y = "Relative frequency")
   }
@@ -357,7 +363,10 @@ line_plot <- function(data, type) {
     plot <- ggplot(outcome_na_count_by_week, aes(x=date, percent)) +
       geom_line() + theme +
       scale_y_continuous(limits = c(0, 0.1), labels = scales::percent) + 
-      scale_x_date(date_breaks = "1 month", date_labels =  "%b") +
+      scale_x_date(breaks = seq(from = as.Date("2022-01-01"),
+                                to = as.Date("2022-06-30"), by = "1 month"),
+                   date_labels =  "%b",
+                   limits = c(as.Date("2022-01-01"), as.Date("2022-06-30"))) +
       labs(x = "Earliest date of documented infection",
            y = "Relative frequency")
   }
@@ -388,7 +397,8 @@ cause_plot <- function(data) {
                     labels = c("direct", "indirect", "unknown")) +
     
     scale_y_continuous(labels = scales::percent) +
-    ylab("Relative frequency") + xlab("") + theme + theme(legend.position = "bottom") +
+    ylab("Relative frequency") + xlab("Earliest date of documented infection") +
+    theme + theme(legend.position = "bottom") +
     theme(legend.text = element_text(size=10))
   return(gg_bar)
 }
@@ -407,7 +417,10 @@ spline_plot <- function(model, terms = c(4,3), type = "main") {
   
   plt_1 <- ggplot(data=plt_data_1, aes(x=dates, y=y_exp), ggtheme = theme) + 
     geom_line() + theme +
-    scale_x_date(date_breaks = "1 month", date_labels =  "%b") +
+    scale_x_date(breaks = seq(from = as.Date("2022-01-01"),
+                              to = as.Date("2022-06-30"), by = "1 month"),
+                 date_labels =  "%b",
+                 limits = c(as.Date("2022-01-01"), as.Date("2022-06-30"))) +
     geom_hline(yintercept = 1, lty = "dashed") +
     scale_y_continuous(trans = log_trans(), limits = c(0.05, 30),
                        breaks = c(0, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16),
