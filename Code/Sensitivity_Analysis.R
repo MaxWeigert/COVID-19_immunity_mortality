@@ -30,10 +30,10 @@ model1 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data1_model)
 plot_spline <- spline_plot(model1)
-# ggsave(plot = plot_spline, filename = "Graphics/FigureS4.png", width = 10,
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS4.jpeg", width = 10,
 #       height = 5)
 plot_coef <- coef_plot(model1)
-# ggsave(plot = plot_coef, filename = "Graphics/FigureS5.png", width = 10,
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS5.jpeg", width = 10,
 #       height = 5)
 # rr_sens <- compute_rr_metrics(data = data3_model, model = model3,
 #                              type = "80+", confint = TRUE, samples = 1000)
@@ -48,10 +48,10 @@ model2 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data2_model)
 plot_spline <- spline_plot(model2)
-# ggsave(plot = plot_spline, filename = "Graphics/FigureS6.png", width = 10,
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS6.jpeg", width = 10,
 #       height = 5)
 plot_coef <- coef_plot(model2)
-# ggsave(plot = plot_coef, filename = "Graphics/FigureS7.png", width = 10,
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS7.jpeg", width = 10,
 #       height = 5)
 
 
@@ -67,10 +67,10 @@ model3 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data3_model)
 plot_spline <- spline_plot(model3)
-# ggsave(plot = plot_spline, filename = "Graphics/FigureS8.png", width = 10,
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS8.jpeg", width = 10,
 #        height = 5)
 plot_coef <- coef_plot(model2)
-# ggsave(plot = plot_coef, filename = "Graphics/FigureS9.png", width = 10,
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS9.jpeg", width = 10,
 #       height = 5)
 
 # 4. Restricting our analysis to subjects whose vaccination status had been known
@@ -82,10 +82,10 @@ model4 <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) ~
                   pspline(Erkrankungsdatum_num, df = 4),
                 x = TRUE, data = data4_model)
 plot_spline <- spline_plot(model4)
-# ggsave(plot = plot_spline, filename = "Graphics/FigureS10.png", width = 10,
+# ggsave(plot = plot_spline, filename = "Graphics/FigureS10.jpeg", width = 10,
 #       height = 5)
 plot_coef <- coef_plot(model4, type = "known_vaccinations")
-# ggsave(plot = plot_coef, filename = "Graphics/FigureS11.png", width = 10,
+# ggsave(plot = plot_coef, filename = "Graphics/FigureS11.jpeg", width = 10,
 #       height = 5)
 
 

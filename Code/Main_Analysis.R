@@ -47,20 +47,20 @@ prop.table(table(data$VerstorbenStatus_surv, data$Impfstatus_surv), margin = 2)
 # Unknown outcome:
 data_unknown <- prepare_data(data_output, type = "unknown_outcome")
 plot_outcome <- line_plot(data = data_unknown, type = "unknown_outcome")
-# ggsave(plot = plot_outcome, filename = "Graphics/FigureS1.png", width = 10,
+# ggsave(plot = plot_outcome, filename = "Graphics/FigureS1.jpeg", width = 10,
 #       height = 5)
 # Causes of death:
 plot_causes <- cause_plot(data)
-# ggsave(plot = plot_causes, filename = "Graphics/FigureS2.png", width = 10,
+# ggsave(plot = plot_causes, filename = "Graphics/FigureS2.jpeg", width = 10,
 #       height = 5)
 # Unknown vaccination status:
 plot_vaccine <- line_plot(data = data, type = "unknown_vaccination")
-# ggsave(plot = plot_vaccine, filename = "Graphics/FigureS3.png", width = 10,
+# ggsave(plot = plot_vaccine, filename = "Graphics/FigureS3.jpeg", width = 10,
 #       height = 5)
 
 # Kaplan-Meier plot function stratified by vaccination status
 plot_km <- km_plot(data)
-# ggsave(plot = plot_km, filename = "Graphics/Figure2.png", width = 10,
+# ggsave(plot = plot_km, filename = "Graphics/Figure2.jpeg", width = 10,
 #       height = 6)
 
 
@@ -80,10 +80,10 @@ summary(model)
 
 # Visualization of results:
 plot_spline <- spline_plot(model)
-# ggsave(plot = plot_spline, filename = "Graphics/Figure3.png", width = 10,
+# ggsave(plot = plot_spline, filename = "Graphics/Figure3.jpeg", width = 10,
 #       height = 5)
 plot_coef <- coef_plot(model)
-# ggsave(plot = plot_coef, filename = "Graphics/Figure4.png", width = 10,
+# ggsave(plot = plot_coef, filename = "Graphics/Figure4.jpeg", width = 10,
 #       height = 5)
 
 # Computation of risk reduction metrics:
