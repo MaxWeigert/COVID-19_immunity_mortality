@@ -36,7 +36,7 @@ Original variables:
 Newly created variables:
 - Erkrankungsdatum_surv: earliest date of documented infection (first occuring date of Erkrankungsbeginn and Meldedatum)
 - Erkrankungsdatum_num: numerical version of Erkrankungsdatum_surv (starting with 2022-01-01 as time origin)
-- Impfstatus_surv: level of immunity with six categories (ungeimpft = unvaccinated, unvollstaendig grundimmunisiert = incomplete primary immunization, grundimmunisiert = complete primary immunization earlier than six months before infection, grundimmunisiert_within_6months = complete primary immunization later than six months before infection, geboostert = boosted immunization earlier than three months before infection, geboostert_within_3months = boosted immunization later than three months before infection, keine Angabe = unknown or implausible records)
+- Impfstatus_surv: level of immunity with seven categories (ungeimpft = unvaccinated, unvollstaendig grundimmunisiert = incomplete primary immunization, grundimmunisiert = complete primary immunization earlier than six months before infection, grundimmunisiert_within_6months = complete primary immunization later than six months before infection, geboostert = boosted immunization earlier than three months before infection, geboostert_within_3months = boosted immunization later than three months before infection, keine Angabe = unknown or implausible records)
 - Alter_surv_num: numerical age variable (center of five-year categories)
 - time: days after earliest date of documented infection
 - VerstorbenStatus_surv: VerstorbenStatus after 60 days
