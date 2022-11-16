@@ -4,15 +4,14 @@
 ### observational study in elderly Bavarians."
 
 # Loading of necessary packages and sourcing of self-defined functions:
-library(pec)
 library(tidyverse)
-library(dplyr)
-library(splines)
+library(pec)
 library(survival)
-library(survminer)
-library(gridExtra)
 library(ggpubr)
 library(lubridate)
+library(viridis)
+library(RColorBrewer)
+library(scales)
 source("Functions.R")
 
 # Reading of the data:
