@@ -12,22 +12,31 @@ Folder structure:
 - Models: Estimated model objects
 
 
-Data Dictionary
+
+
+Data dictionary
 ---------------
 
-Original variables:
-- Meldedatum – date when the infection was recorded
-- Erkrankungsbeginn – date when first symptoms occurred
-- AlterKat – age category in years (0-5 / 6-11 / 12-15 / 16-19 / 20-34 / 35-59 / 60-64 / 65-69 / 70-74 / 75-79 / 80-84 / 85-89 / 90+)
-- Geschlecht – sex of the infected individual (weiblich = female, männlich = male, divers = diverse, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
-- HospitalisierungStatus – hospitalization of the infected individual (Ja = yes, Nein = No, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
-- ExHosp_StayFrom – date of hospitalization
-- impfung_datum – date of last vaccination
-- impfstatus – level of immunity (ungeimpft = unvaccinated, unvollstaendig grundimmunisiert = incomplete primary immunization, grundimmunisiert = complete primary immunization, geboostert = boosted immunization, unplausible oder unzureichende Angaben = implausible record, keine Angabe = unknown)
-- reinfektion - reinfection (Ja = yes, Nein = no)
-- VerstorbenDatum - date of death
-- VerstorbenStatus - (Ja = yes, Nein = no, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
-- VerstorbenGrund – cause of death (an der gemeldeten Krankheit = COVID-19, aufgrund anderer Ursache = other cause, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
+The data we used for our analyses are structured as follows:
 
-Derived variables:
+Original variables:
+- Meldedatum: date when the infection was recorded
+- Erkrankungsbeginn: date when first symptoms occurred
+- AlterKat: age category in years (0-5 / 6-11 / 12-15 / 16-19 / 20-34 / 35-59 / 60-64 / 65-69 / 70-74 / 75-79 / 80-84 / 85-89 / 90+)
+- Geschlecht: sex of the infected individual (weiblich = female, männlich = male, divers = diverse, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
+- HospitalisierungStatus: hospitalization of the infected individual (Ja = yes, Nein = No, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
+- ExHosp_StayFrom: date of hospitalization
+- impfung_datum: date of last vaccination
+- impfstatus: level of immunity (ungeimpft = unvaccinated, unvollstaendig grundimmunisiert = incomplete primary immunization, grundimmunisiert = complete primary immunization, geboostert = boosted immunization, unplausible oder unzureichende Angaben = implausible record, keine Angabe = unknown)
+- reinfektion: reinfection (Ja = yes, Nein = no)
+- VerstorbenDatum: date of death
+- VerstorbenStatus: death of the infected individual (Ja = yes, Nein = no, nicht ermittelbar = unascertainable, nicht erhoben = not recorded)
+- VerstorbenGrund: cause of death (an der gemeldeten Krankheit = COVID-19 (direct), aufgrund anderer Ursache = other cause (indirect), nicht ermittelbar = unascertainable (unknown), nicht erhoben = not recorded (unknown))
+
+Newly created variables:
+- Erkrankungsdatum_surv: earliest date of documented infection (first occuring date of Erkrankungsbeginn and Meldedatum)
+- Erkrankungsdatum_num: numerical version of Erkrankungsdatum_surv (starting with 2022-01-01 as time origin)
+- Alter_surv_num: numerical age variable (center of five-year categories)
+- time: days after earliest date of documented infection
+- VerstorbenStatus_surv: VerstorbenStatus after 60 days
 
