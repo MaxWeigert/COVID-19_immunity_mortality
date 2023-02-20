@@ -11,7 +11,8 @@ library(pec)
 library(scales)
 library(survival)
 library(tidyverse)
-source("Functions.R")
+library(gridExtra)
+source("Code/Functions.R")
 
 ##################################
 ### Data Reading & Preparation ###
@@ -72,7 +73,7 @@ summary(model_cause)
 
 plot_spline_english <- spline_plot(model_cause)
 # ggsave(plot = plot_spline_english, filename = "Graphics/eFigure4.jpeg", width = 10,
-#        height = 5)
+#       height = 5)
 
 plot_spline_cause_german <- spline_plot(model_cause, version = "german")
 # ggsave(plot = plot_spline_cause_german, filename = "Graphics/eFigure4_german.jpeg",
@@ -80,11 +81,11 @@ plot_spline_cause_german <- spline_plot(model_cause, version = "german")
 
 plot_coef_cause_english <- coef_plot(model_cause)
 # ggsave(plot = plot_coef_cause_english, filename = "Graphics/eFigure5.jpeg", width = 10,
-#       height = 5)
+#        height = 5)
 
 plot_coef_cause_german <- coef_plot(model_cause, version = "german")
 # ggsave(plot = plot_coef_cause_german, filename = "Graphics/eFigure5_german.jpeg", width = 10,
-#       height = 5)
+#        height = 5)
 
 
 

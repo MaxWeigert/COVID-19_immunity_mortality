@@ -76,13 +76,6 @@ prepare_data <- function(data, type = "main") {
       droplevels()
   }
   
-  # Death only of covid:
-  if (type == "covid_only") {
-    data <- data %>%
-      mutate(VerstorbenStatus_surv = if_else(VerstorbenGrund != "an der gemeldeten Krankheit",
-                                             0, VerstorbenStatus_surv))
-  }
-  
   # Exclusion of implausible observations:
   data <- data %>% filter(between(Erkrankungsdatum_surv, as.Date("2022-01-01"),
                                   as.Date("2022-06-30")))
@@ -141,6 +134,13 @@ prepare_data <- function(data, type = "main") {
   # Set NA time to maximum of follow-up time period (60 days):
   data <- data %>%
     mutate(time = if_else(is.na(time), 60, time))
+  
+  # Death only of covid:
+  if (type == "covid_only") {
+    data <- data %>%
+      mutate(VerstorbenStatus_surv = if_else(VerstorbenGrund != "an der gemeldeten Krankheit",
+                                             0, VerstorbenStatus_surv))
+  }
   
   # Censor data to a follow-up time of 60 days. If patient survived longer than 60 days, the person will be treated as a survivor.
   data <- data %>%
@@ -287,7 +287,7 @@ theme <- theme_bw() +
 
 
 ## Kaplan Meier Plot Functions:
-km_plot <- function(data, version = "english", conf_int = FALSE) {
+km_plot <- function(data, version = "english", conf_int = FALSE, risk.table = TRUE) {
   
   # Reorder levels of Impfstatus_surv:
   data$Impfstatus_surv <- factor(data$Impfstatus_surv,
@@ -325,7 +325,8 @@ km_plot <- function(data, version = "english", conf_int = FALSE) {
                         Impfstatus_surv, type = "kaplan-meier",
                       data = data)
     
-    gg_km <- ggsurvplot(fit = km_fit, data = data, conf.int = conf_int, risk.table = TRUE, 
+    gg_km <- ggsurvplot(fit = km_fit, data = data, conf.int = conf_int,
+                        risk.table = risk.table, 
                         xlab = x_name,
                         ylab = y_name, title = "",
                         ylim = c(0.97, 1), 
@@ -343,8 +344,10 @@ km_plot <- function(data, version = "english", conf_int = FALSE) {
                           theme(legend.justification = "left"))
     
     gg_km$plot <- gg_km$plot + guides(colour = guide_legend(nrow = length(legend_labels)))
-    gg_km$table <- gg_km$table + labs(x = NULL, y = NULL) +
-      theme(plot.margin=unit(c(1,0,1.5,0),"cm"))
+    if (risk.table == TRUE) {
+      gg_km$table <- gg_km$table + labs(x = NULL, y = NULL) +
+        theme(plot.margin=unit(c(1,0,1.5,0),"cm"))
+    }
   
   return(gg_km)
 }
