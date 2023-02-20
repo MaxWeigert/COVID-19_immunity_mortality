@@ -135,17 +135,17 @@ prepare_data <- function(data, type = "main") {
   data <- data %>%
     mutate(time = if_else(is.na(time), 60, time))
   
+  # Censor data to a follow-up time of 60 days. If patient survived longer than 60 days, the person will be treated as a survivor.
+  data <- data %>%
+    mutate(VerstorbenStatus_surv = if_else(time > 60, 0, VerstorbenStatus_surv)) %>%
+    mutate(time = if_else(time > 60, 60 , time))
+  
   # Death only of covid:
   if (type == "covid_only") {
     data <- data %>%
       mutate(VerstorbenStatus_surv = if_else(VerstorbenGrund != "an der gemeldeten Krankheit",
                                              0, VerstorbenStatus_surv))
   }
-  
-  # Censor data to a follow-up time of 60 days. If patient survived longer than 60 days, the person will be treated as a survivor.
-  data <- data %>%
-    mutate(VerstorbenStatus_surv = if_else(time > 60, 0, VerstorbenStatus_surv)) %>%
-    mutate(time = if_else(time > 60, 60 , time))
   
   # Censoring after 30 days:
   if (type == "censoring") {

@@ -71,8 +71,8 @@ model_cause <- coxph(formula = Surv(time = time, event = VerstorbenStatus_surv) 
 summary(model_cause)
 # saveRDS(model_cause, file = "Models/model_cause.rds")
 
-plot_spline_english <- spline_plot(model_cause)
-# ggsave(plot = plot_spline_english, filename = "Graphics/eFigure4.jpeg", width = 10,
+plot_spline_cause_english <- spline_plot(model_cause)
+# ggsave(plot = plot_spline_cause_english, filename = "Graphics/eFigure4.jpeg", width = 10,
 #       height = 5)
 
 plot_spline_cause_german <- spline_plot(model_cause, version = "german")
